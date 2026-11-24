@@ -1,8 +1,15 @@
 {
   "domain": "smart_garden",
   "name": "Smart Garden",
-  "after_dependencies": ["frontend"],
-  "codeowners": ["@sharjeelkiyani"],
+  "after_dependencies": [
+    "frontend"
+  ],
+  "categories": [
+    "garden_plants"
+  ],
+  "codeowners": [
+    "@sharjeelkiyani"
+  ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/sharjeelkiyani/smart-garden-integration",
@@ -10,5 +17,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/sharjeelkiyani/smart-garden-integration/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
