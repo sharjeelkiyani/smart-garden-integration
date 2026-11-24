@@ -53,12 +53,27 @@ data:
 
 If another zone is watering, the new one waits its turn.
 
-## Sidebar
-The integration adds a **Smart Garden** item to the sidebar that opens the full app (turn it off in the
-integration's **Configure** options). Browsers only keep you signed in inside Home Assistant when the two
-are on the *same site*: the same IP on different ports (e.g. HA `http://192.168.1.10:8123`, garden
-`http://192.168.1.10:5120` through a proxy), or names under the same domain over HTTPS. Otherwise the
-page asks you to sign in each time - open it in its own tab instead.
+## Dashboard
+The integration adds **Smart Garden** to the sidebar: a dashboard drawn by Home Assistant itself, so
+it works over HTTPS or not, at home or away, in the Home Assistant app too, with no second sign-in.
+
+- **Watering now** with time left and what's waiting, **Stop all**, automatic watering on/off (admin)
+- **Water today, next run, rain, relay boards**
+- **Soil moisture chart** for the last 24 hours or 7 days (from Home Assistant's history)
+- **Sensors** - soil, temperature, humidity, rain, alarm
+- **Zones** - soil level, watered today, time left; *Water* for some minutes, *Until soil right*, *Stop*,
+  zone on/off (admin)
+- **Run a schedule now**
+
+It follows your Home Assistant theme, light or dark. Turn it off in the integration's **Configure**
+options.
+
+**The full app in the sidebar too (optional).** In **Configure**, set *Also show the full app at this
+address*. Browsers only keep you signed in to it inside Home Assistant when it's on the *same site*:
+over HTTPS that means a path on Home Assistant's own address through your reverse proxy, e.g.
+`https://your-ha-address/garden/` (Smart Garden setting `URL_PREFIX=/garden`).
+
+![Smart Garden dashboard](images/dashboard.png)
 
 ## Privacy
 Everything stays on your network: Home Assistant talks only to your Smart Garden, every 10 seconds,
