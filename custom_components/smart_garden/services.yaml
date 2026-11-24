@@ -1,0 +1,17 @@
+water:
+  target:
+    entity:
+      integration: smart_garden
+      domain: switch
+  fields:
+    minutes:
+      selector:
+        number:
+          min: 0.5
+          max: 240
+          step: 0.5
+          unit_of_measurement: min
+    until_soil:
+      default: false
+      selector:
+        boolean:
