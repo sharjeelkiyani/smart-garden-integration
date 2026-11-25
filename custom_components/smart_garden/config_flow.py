@@ -98,7 +98,7 @@ class SmartGardenConfigFlow(ConfigFlow, domain=DOMAIN):
         if self.source == SOURCE_REAUTH:
             self._abort_if_unique_id_mismatch(reason="wrong_garden")
             return self.async_update_reload_and_abort(self._get_reauth_entry(), data_updates={CONF_KEY: key})
-        self._abort_if_unique_id_configured(updates={CONF_URL: self._url, CONF_KEY: key})
+        self._abort_if_unique_id_configured(updates={CONF_URL: self._url, CONF_KEY: key}, reload_on_update=False)
         return self.async_create_entry(title=info.get("name") or "Smart Garden",
                                        data={CONF_URL: self._url, CONF_KEY: key})
 
@@ -117,7 +117,8 @@ class SmartGardenConfigFlow(ConfigFlow, domain=DOMAIN):
         # Already set up: follow a new IP address, but never replace a name or https address someone chose.
         entry = self.hass.config_entries.async_entry_for_domain_unique_id(DOMAIN, gid)
         moved = entry is not None and _is_ip_url(entry.data[CONF_URL]) and entry.data[CONF_URL] != self._url
-        self._abort_if_unique_id_configured(updates={CONF_URL: self._url} if moved else None)
+        # (the update listener reloads the entry when its address changes)
+        self._abort_if_unique_id_configured(updates={CONF_URL: self._url} if moved else None, reload_on_update=False)
         self.context["title_placeholders"] = {"name": self._name}
         return await self.async_step_zeroconf_confirm()
 

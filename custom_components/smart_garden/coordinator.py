@@ -31,6 +31,7 @@ class GardenCoordinator(DataUpdateCoordinator[dict]):
         self.info = info
         self._polls = 0
         self.garden_device_id: str | None = None
+        self.panels: list[str] = []          # sidebar paths this garden added
 
     @property
     def garden_id(self) -> str:
