@@ -41,29 +41,47 @@ def _paths(hass: HomeAssistant, entry: ConfigEntry) -> tuple[str, str]:
     return base, f"{base}-app"
 
 
-async def register_panels(hass: HomeAssistant, entry: ConfigEntry, info: dict) -> None:
+def _free(hass: HomeAssistant, *candidates: str) -> str | None:
+    """The first sidebar path nobody else uses (e.g. the person's own dashboard may be at smart-garden)."""
+    panels = hass.data.get("frontend_panels", {})
+    return next((c for c in candidates if c not in panels), None)
+
+
+async def register_panels(hass: HomeAssistant, entry: ConfigEntry, info: dict) -> list[str]:
+    """Add the sidebar items; returns the paths added, so unloading removes only ours."""
     dash, app = _paths(hass, entry)
     name = info.get("name") or "Smart Garden"
+    added: list[str] = []
     if entry.options.get(CONF_SIDEBAR, True):
+        path = _free(hass, dash, f"{dash}-dashboard", f"{dash}-{entry.entry_id[:6]}")
         try:
+            if not path:
+                raise ValueError("every sidebar path is taken")
             await panel_custom.async_register_panel(
-                hass, frontend_url_path=dash, webcomponent_name="smart-garden-panel",
+                hass, frontend_url_path=path, webcomponent_name="smart-garden-panel",
                 sidebar_title=name, sidebar_icon="mdi:sprinkler-variant",
                 module_url=f"{STATIC_URL}/smart-garden-panel.js?v={VERSION}",
                 config={"entry_id": entry.entry_id}, require_admin=False)
+            added.append(path)
         except ValueError as err:
             _LOGGER.warning("Smart Garden dashboard not added to the sidebar: %s", err)
     if url := entry.options.get(CONF_PANEL_URL):
+        path = _free(hass, app, f"{app}-page", f"{app}-{entry.entry_id[:6]}")
         try:
+            if not path:
+                raise ValueError("every sidebar path is taken")
             frontend.async_register_built_in_panel(
                 hass, "iframe", sidebar_title=f"{name} app", sidebar_icon="mdi:open-in-app",
-                frontend_url_path=app, config={"url": url}, require_admin=False, update=True)
+                frontend_url_path=path, config={"url": url}, require_admin=False)
+            added.append(path)
         except ValueError as err:
             _LOGGER.warning("Smart Garden app page not added to the sidebar: %s", err)
+    return added
 
 
-def remove_panels(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    for path in _paths(hass, entry):
+def remove_panels(hass: HomeAssistant, paths: list[str]) -> None:
+    """Remove only the sidebar items this garden added - never someone's own dashboard."""
+    for path in paths:
         if path in hass.data.get("frontend_panels", {}):
             frontend.async_remove_panel(hass, path)
 

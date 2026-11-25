@@ -48,13 +48,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: GardenConfigEntry) -> bo
         configuration_url=info.get("app_url") or entry.data[CONF_URL])
     coordinator.garden_device_id = garden.id
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    await register_panels(hass, entry, info)
+    coordinator.panels = await register_panels(hass, entry, info)
     entry.async_on_unload(entry.add_update_listener(_options_changed))
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: GardenConfigEntry) -> bool:
-    remove_panels(hass, entry)
+    remove_panels(hass, getattr(entry.runtime_data, "panels", []))
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
