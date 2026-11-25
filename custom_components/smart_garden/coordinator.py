@@ -19,6 +19,7 @@ def layout(info: dict) -> tuple:
     return (tuple((z["id"], z["name"]) for z in info.get("zones", [])),
             tuple((s["id"], s["name"], s["kind"]) for s in info.get("sensors", [])),
             tuple((s["id"], s["name"]) for s in info.get("schedules", [])),
+            tuple((b["key"], b["name"]) for b in info.get("batteries", [])),
             info.get("role"))
 
 

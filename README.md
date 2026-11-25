@@ -51,6 +51,7 @@ to pair again. Moved the garden to a new name or https address?
 |---|---|
 | Garden | Watering now, Time left, Next run, Water today, Raining, Relay boards, garden sensors (soil, temperature, humidity, rain, alarm), Stop all, Run *schedule*, Automatic watering (admin) |
 | Each zone | Water (on = water for the zone's usual minutes, off = stop), Soil moisture, Watered today, Time left, Zone on (admin) |
+| Zigbee sensors | *Sensor* battery (%, one per battery-powered device; also shown on the dashboard's sensor tiles, red below 15 %) |
 
 **Action `smart_garden.water`** - target a zone's *Water* switch:
 

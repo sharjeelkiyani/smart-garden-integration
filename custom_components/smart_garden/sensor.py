@@ -1,10 +1,12 @@
-"""Sensors: soil moisture and watering per zone; garden sensors; what's watering, time left, next run."""
+"""Sensors: soil moisture and watering per zone; garden sensors and their batteries; what's watering, time left,
+next run."""
 from __future__ import annotations
 
+import re
 from datetime import datetime
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
-from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfTime
+from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
@@ -27,6 +29,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: GardenConfigEntry, add: 
     for s in c.info["sensors"]:
         if s["kind"] in KINDS:
             ents.append(GardenSensor(c, s))
+    ents += [SensorBattery(c, b) for b in c.info.get("batteries", [])]
     ents += [WateringNow(c), TimeLeft(c), NextRun(c), WaterToday(c)]
     add(ents)
 
@@ -86,6 +89,28 @@ class GardenSensor(GardenEntity, SensorEntity):
     @property
     def native_value(self):
         return (self.coordinator.data or {}).get("sensors", {}).get(self._sid)
+
+
+def battery_slug(key: str) -> str:
+    """zb1:Soil 1 -> zb1_soil_1 (stable part of the unique id)."""
+    return re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_")
+
+
+class SensorBattery(GardenEntity, SensorEntity):
+    """Battery of a Zigbee sensor device (one per device, named after the sensors on it)."""
+    _attr_device_class = SensorDeviceClass.BATTERY
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, c, b):
+        super().__init__(c, f"battery_{battery_slug(b['key'])}")
+        self._key = b["key"]
+        self._attr_name = f"{b['name']} battery"
+
+    @property
+    def native_value(self):
+        return (self.coordinator.data or {}).get("batteries", {}).get(self._key)
 
 
 class WateringNow(GardenEntity, SensorEntity):
