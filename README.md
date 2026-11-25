@@ -22,17 +22,28 @@ itself inside Home Assistant.
 **By hand:** copy `custom_components/smart_garden` into your `config/custom_components/` and restart.
 
 ## Set up
-1. In Smart Garden open **My account → Connection keys**, enter your password and **Make a connection
-   key**. Copy it - it's shown once.
-2. In Home Assistant: **Settings → Devices & services → Add integration → Smart Garden**.
-3. Enter the address you open Smart Garden at (for example `http://192.168.1.50:5120`) and the key.
+**Found by itself (easiest).** Smart Garden announces itself on your home network, so Home Assistant
+shows it under **Settings → Devices & services → Discovered**.
 
-The key acts as the Smart Garden account that made it:
+1. Press **Add** on *Smart Garden*, then **Submit**. Home Assistant shows a 6-digit code.
+2. Open the Smart Garden website signed in as an admin. A banner says *Home Assistant wants to
+   connect*. Check it shows the same code and tap **Allow**.
+3. Done - no address or key to type. Home Assistant follows the garden if its IP address changes.
+
+**Not discovered?** (Home Assistant and the garden on different networks, Home Assistant in Docker
+without host networking, or the app older than this feature.) **Add integration → Smart Garden**, type
+the address you open Smart Garden at (for example `http://192.168.1.50:5120`) and leave the key empty
+to pair the same way - or paste a connection key made in Smart Garden under **My account → Connection
+keys**.
+
+Pairing makes a connection key for the admin who tapped Allow (you'll see it under **My account →
+Connection keys**). A key acts as the account it belongs to:
 - **user** account - see everything, water, stop, run schedules;
 - **admin** account - also turn zones and automatic watering on or off.
 
-Revoke the key in Smart Garden at any time; Home Assistant then asks for a new one. Moved the garden to
-a new address? **Settings → Devices & services → Smart Garden → ⋮ → Reconfigure**.
+Revoke the key in Smart Garden at any time; Home Assistant then asks to reconnect - leave the key empty
+to pair again. Moved the garden to a new name or https address?
+**Settings → Devices & services → Smart Garden → ⋮ → Reconfigure**.
 
 ## What you get
 
