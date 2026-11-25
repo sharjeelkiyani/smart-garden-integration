@@ -19,7 +19,7 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/sharjeelkiyani/smart-garden-integration/issues",
   "requirements": [],
-  "version": "1.2.2",
+  "version": "1.3.0",
   "zeroconf": [
     "_smartgarden._tcp.local."
   ]

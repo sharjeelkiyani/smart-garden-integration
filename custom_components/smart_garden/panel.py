@@ -103,7 +103,11 @@ def layout(hass: HomeAssistant, entry: ConfigEntry) -> dict:
               "enabled": eid(f"zone_{z['id']}_enabled"), "moisture": eid(f"zone_{z['id']}_moisture"),
               "today": eid(f"zone_{z['id']}_today"), "left": eid(f"zone_{z['id']}_left")}
              for z in info["zones"]]
-    sensors = [{"name": s["name"], "kind": s["kind"], "entity": eid(f"sensor_{s['id']}")} for s in info["sensors"]]
+    from .sensor import battery_slug
+    battery_of = {sid: eid(f"battery_{battery_slug(b['key'])}")
+                  for b in info.get("batteries", []) for sid in b["sensor_ids"]}
+    sensors = [{"name": s["name"], "kind": s["kind"], "entity": eid(f"sensor_{s['id']}"),
+                "battery": battery_of.get(s["id"])} for s in info["sensors"]]
     schedules = [{"name": s["name"], "enabled": s["enabled"], "button": eid(f"schedule_{s['id']}")}
                  for s in info["schedules"]]
     garden = {k: eid(k) for k in ("watering_now", "time_left", "next_run", "water_today", "raining",

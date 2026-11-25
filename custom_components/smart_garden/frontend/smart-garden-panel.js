@@ -144,7 +144,8 @@ class SmartGardenPanel extends HTMLElement {
       </div>`).join("");
 
     const sensors = g.sensors.filter((s) => s.entity).map((s) => `
-      <div class="sensor"><span class="muted">${esc(s.name)}</span><b data-sensor="${esc(s.entity)}" data-kind="${esc(s.kind)}">–</b></div>`).join("");
+      <div class="sensor"><span class="muted">${esc(s.name)}</span><b data-sensor="${esc(s.entity)}" data-kind="${esc(s.kind)}">–</b>
+        ${s.battery ? `<span class="batt" data-battery="${esc(s.battery)}" hidden><ha-icon></ha-icon><span></span></span>` : ""}</div>`).join("");
 
     const schedules = g.schedules.filter((s) => s.button).map((s) => `
       <button class="btn" data-schedule="${esc(s.button)}"><ha-icon icon="mdi:play-circle"></ha-icon> ${esc(s.name)}</button>`).join("");
@@ -290,6 +291,16 @@ class SmartGardenPanel extends HTMLElement {
       else if (kind === "alarm") el.textContent = st.state === "on" ? "Alarm" : "OK";
       else el.textContent = `${Math.round(num(st) * 10) / 10}${st.attributes.unit_of_measurement ? " " + st.attributes.unit_of_measurement : ""}`;
     });
+    r.querySelectorAll("[data-battery]").forEach((el) => {
+      const b = num(this._st(el.dataset.battery));
+      el.hidden = b == null;
+      if (b == null) return;
+      const low = b < 15, step = Math.max(10, Math.min(100, Math.round(b / 10) * 10));
+      el.classList.toggle("low", low);
+      el.querySelector("ha-icon").setAttribute("icon", low ? "mdi:battery-alert-variant-outline" : step === 100 ? "mdi:battery" : `mdi:battery-${step}`);
+      el.querySelector("span").textContent = `${Math.round(b)}%${low ? " · replace" : ""}`;
+      el.title = low ? "Battery low - replace it soon" : "Battery";
+    });
   }
 
   // ---- chart ------------------------------------------------------------------------------
@@ -420,6 +431,9 @@ h3 { font-size: 16px; font-weight: 500; margin: 0; flex: 1; }
 .sensors { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 .sensor { display: flex; flex-direction: column; gap: 2px; }
 .sensor b { font-size: 18px; font-weight: 500; }
+.batt { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; color: var(--secondary-text-color); font-variant-numeric: tabular-nums; }
+.batt ha-icon { --mdc-icon-size: 16px; }
+.batt.low { color: var(--error-color); font-weight: 600; }
 .schedules { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .seg { display: inline-flex; border: 1px solid var(--divider-color); border-radius: 16px; overflow: hidden; }
 .seg button { font: inherit; font-size: 13px; border: 0; background: transparent; color: var(--secondary-text-color); padding: 4px 12px; cursor: pointer; min-height: 30px; }
