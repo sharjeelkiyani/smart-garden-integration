@@ -151,6 +151,8 @@ class SmartGardenPanel extends HTMLElement {
 
     this.shadowRoot.innerHTML = `<style>${CSS}</style>${this._toolbar(g.name)}
     <div class="wrap">
+      <div class="top">
+      <div class="left">
       <div class="card now">
         <div class="now-main">
           <div><div class="muted small">Watering now</div><div class="big" data-now>–</div>
@@ -169,22 +171,25 @@ class SmartGardenPanel extends HTMLElement {
         <div class="card kpi"><span class="muted small">Rain</span><b data-kpi="raining">–</b></div>
         <div class="card kpi"><span class="muted small">Relay boards</span><b data-kpi="boards_online">–</b></div>
       </div>
+      </div>
 
-      <div class="card">
+      <div class="card chart-card">
         <div class="row"><h2>Soil moisture</h2><span class="spacer"></span>
           <div class="seg">${Object.keys(RANGES).map((r) => `<button data-range="${r}" class="${r === this._range ? "on" : ""}">${r}</button>`).join("")}</div></div>
         <div class="legend" data-legend></div>
         <div class="chart" data-chart><p class="muted small">Loading…</p></div>
         <div class="tip" data-tip hidden></div>
       </div>
-
-      ${sensors ? `<div class="card"><h2>Sensors</h2><div class="sensors">${sensors}</div></div>` : ""}
+      </div>
 
       <h2 class="section">Zones</h2>
       <div class="zones">${zoneCards}</div>
 
+      <div class="extras">
+      ${sensors ? `<div class="card"><h2>Sensors</h2><div class="sensors">${sensors}</div></div>` : ""}
       ${schedules ? `<div class="card"><h2>Run a schedule now</h2><div class="schedules">${schedules}</div>
         <p class="muted small">Starts every zone of the schedule, one after another, after anything already watering.</p></div>` : ""}
+      </div>
     </div>`;
     this._wireMenu();
     this._wire();
@@ -361,7 +366,15 @@ const CSS = `
 .toolbar .title { font-size: 20px; margin-left: 8px; }
 .tb-link { color: inherit; font-size: 14px; text-decoration: none; border: 1px solid currentColor; border-radius: 16px; padding: 4px 12px; opacity: .9; }
 .spacer { flex: 1; }
-.wrap { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+.wrap { max-width: 2200px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; container-type: inline-size; }
+.top, .left, .extras { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.chart-card { min-width: 0; }
+/* Wide screens: status and figures beside the chart, sensors beside schedules - no empty sides */
+@container (min-width: 1000px) {
+  .top { grid-template-columns: minmax(360px, 2fr) 3fr; }
+  .left .kpis { grid-template-columns: repeat(2, 1fr); }
+  .extras { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+}
 .card { background: var(--card-background-color, #fff); border-radius: var(--ha-card-border-radius, 12px); box-shadow: var(--ha-card-box-shadow, none); border: 1px solid var(--divider-color); padding: 16px; position: relative; }
 h2 { font-size: 16px; font-weight: 500; margin: 0 0 12px; }
 h2.section { margin: 8px 0 -4px; }
