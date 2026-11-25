@@ -3,21 +3,21 @@
     "step": {
       "user": {
         "title": "Connect your Smart Garden",
-        "description": "In Smart Garden open **My account → Connection keys**, make a key and paste it here.",
+        "description": "Usually Home Assistant finds your garden by itself (Settings → Devices & services → Discovered). To add it by hand, type its address and leave the key empty: Home Assistant shows a code and an admin taps **Allow** in Smart Garden.",
         "data": {
           "url": "Smart Garden address",
-          "key": "Connection key"
+          "key": "Connection key (optional)"
         },
         "data_description": {
           "url": "The address you open Smart Garden at, e.g. http://192.168.1.50:5120",
-          "key": "Starts with sg_. It acts as the account that made it."
+          "key": "Leave empty to pair with a code. Or paste a key made in Smart Garden (My account → Connection keys) - it starts with sg_."
         }
       },
       "reauth_confirm": {
-        "title": "New connection key needed",
-        "description": "The key for {url} was revoked or its account is off. Make a new one in Smart Garden (My account → Connection keys).",
+        "title": "Reconnect Smart Garden",
+        "description": "Home Assistant's key for {url} was revoked or its account is off. Leave the key empty and press **Submit** to pair again with a code, or paste a new connection key.",
         "data": {
-          "key": "Connection key"
+          "key": "Connection key (optional)"
         }
       },
       "reconfigure": {
@@ -25,17 +25,34 @@
         "data": {
           "url": "Smart Garden address"
         }
+      },
+      "zeroconf_confirm": {
+        "title": "Smart Garden found",
+        "description": "Found **{name}** at {url}.\n\nPress **Submit** and Home Assistant will show a code; an admin then taps **Allow** in Smart Garden. (Or paste a connection key instead.)",
+        "data": {
+          "key": "Connection key (optional)"
+        }
       }
     },
     "error": {
       "cannot_connect": "Can't reach Smart Garden at that address, or it needs updating to a version with connection keys.",
-      "invalid_auth": "That connection key is wrong or revoked (after 5 wrong tries, wait 15 minutes)."
+      "invalid_auth": "That connection key is wrong or revoked (after 5 wrong tries, wait 15 minutes).",
+      "pair_unsupported": "That Smart Garden can't pair yet - update the app, or paste a connection key.",
+      "pair_busy": "Smart Garden has too many pairing requests waiting - try again in a few minutes."
     },
     "abort": {
-      "already_configured": "This garden is already set up - its address and key were updated.",
+      "already_configured": "This garden is already set up.",
       "reauth_successful": "Reconnected.",
       "reconfigure_successful": "Address changed.",
-      "wrong_garden": "That address is a different garden."
+      "wrong_garden": "That address is a different garden.",
+      "pair_denied": "Smart Garden turned the request down.",
+      "pair_expired": "Nobody tapped Allow in time. Start again from Settings → Devices & services.",
+      "not_a_garden": "That device isn't a Smart Garden.",
+      "cannot_connect": "Paired, but Smart Garden can't be reached now - try again."
+    },
+    "flow_title": "{name}",
+    "progress": {
+      "pair": "## {code}\n\nOpen Smart Garden ({url}) signed in as an admin. A banner says Home Assistant wants to connect - check it shows **{code}** and tap **Allow**.\n\nThis waits up to 10 minutes."
     }
   },
   "options": {

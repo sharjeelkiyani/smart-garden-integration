@@ -19,6 +19,14 @@ class GardenRefused(GardenError):
     """The garden refused the command (e.g. zone turned off, over its limit)."""
 
 
+class GardenNoPairing(GardenError):
+    """The address answers but isn't a Smart Garden that can pair (or the app needs updating)."""
+
+
+class GardenBusy(GardenError):
+    """The garden turned a pairing request away for now (too many waiting, or too many tries)."""
+
+
 class GardenApi:
     def __init__(self, session: aiohttp.ClientSession, url: str, key: str) -> None:
         self._session = session
@@ -44,6 +52,42 @@ class GardenApi:
                     return await resp.json()
         except (aiohttp.ClientError, TimeoutError) as err:
             raise GardenError(f"can't reach {self.url}: {err}") from err
+
+    async def _public(self, method: str, path: str, body: dict | None = None) -> tuple[int, dict]:
+        """Calls that work before there is a key: hello and pairing."""
+        try:
+            async with asyncio.timeout(15):
+                resp = await self._session.request(method, f"{self.url}/api/v1{path}", json=body,
+                                                   allow_redirects=False)
+                async with resp:
+                    try:
+                        data = await resp.json(content_type=None)
+                    except ValueError:
+                        data = None
+                    return resp.status, data if isinstance(data, dict) else {}
+        except (aiohttp.ClientError, TimeoutError) as err:
+            raise GardenError(f"can't reach {self.url}: {err}") from err
+
+    async def hello(self) -> dict:
+        """The garden's id and name, without a key. Raises GardenNoPairing for anything else."""
+        status, data = await self._public("GET", "/hello")
+        if status != 200 or data.get("app") != "smart-garden":
+            raise GardenNoPairing("not a Smart Garden that can pair (update the app, or use a connection key)")
+        return data
+
+    async def pair_start(self, name: str) -> dict:
+        """Ask to connect: returns {"token", "code", "expires_in"}; the code is shown to the person."""
+        status, data = await self._public("POST", "/pair", {"client": "Home Assistant", "name": name})
+        if status == 429:
+            raise GardenBusy(data.get("error") or "busy - try again in a few minutes")
+        if status != 200 or not data.get("token"):
+            raise GardenNoPairing("this Smart Garden can't pair (update the app, or use a connection key)")
+        return data
+
+    async def pair_poll(self, token: str) -> dict:
+        """{"status": "waiting" | "approved" | "denied" | "expired"} and "key" once approved."""
+        _status, data = await self._public("GET", f"/pair/{token}")
+        return data if data.get("status") else {"status": "expired"}
 
     async def info(self) -> dict:
         return await self._call("GET", "/info")
